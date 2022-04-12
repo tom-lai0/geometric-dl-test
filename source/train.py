@@ -4,9 +4,11 @@ from functions import *
 import matplotlib.pyplot as plt
 
 
-def train(tr_set, model, config):
-
+def train(data, tr_set, model, config):
+    
     start_time = time()
+    verboseprint = print if config['verbose'] else lambda *a, **k: None
+    verboseprint('Training Started')
 
     optimizer = getattr(torch.optim, config['optimizer'])(
         model.parameters(), **config['optim_hparas'])
@@ -21,7 +23,6 @@ def train(tr_set, model, config):
 
     while epoch < config['n_epochs']:
         model.train()
-        print(f'Training: the {epoch + 1} epoch.')
 
         for x in tr_set:
             optimizer.zero_grad()
@@ -43,20 +44,29 @@ def train(tr_set, model, config):
 
         epoch += 1
 
-        if epoch % 10 == 0:
-            print(f'Epoch {epoch}: ')
-            print(loss_hist['exp_inv_dist'][-1])
-            print(loss_hist['kl_loss'][-1])
-            print(loss_hist['recon_loss'][-1])
-            print('-' * 20)
+        if epoch % config['epoch_per_fig'] == 0:
+            verboseprint(f'Epoch {epoch}: ')
+            verboseprint(loss_hist['exp_inv_dist'][-1])
+            verboseprint(loss_hist['kl_loss'][-1])
+            verboseprint(loss_hist['recon_loss'][-1])
+            verboseprint('-' * 20)
 
-            # plt.figure()
-            # plt.scatter()
+            d, _ = model.encode(data)
+            d = d.cpu().detach().numpy()
+
+            f, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(27, 9))
+            ax1.scatter(d[:, 0], d[:, 1], c=data[:, 0], marker='.')
+            ax1.set_title('x')
+            ax2.scatter(d[:, 0], d[:, 1], c=data[:, 1], marker='.')
+            ax2.set_title('y')
+            ax3.scatter(d[:, 0], d[:, 1], c=data[:, 2], marker='.')
+            ax3.set_title('z')
+            plt.savefig(config['exp_path'] + f'encoded_epoch_{epoch}.png')
 
 
-    torch.save(model.state_dict(), f='experiment\\save_1.pt')
+    torch.save(model.state_dict(), f=config['save_path'])
 
     end_time = time()
-    print(f'Training: Finished in {end_time - start_time}')
+    print(f'Training Finished in {round(end_time - start_time, 2)}')
 
     return loss_hist
