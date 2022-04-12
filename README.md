@@ -1,5 +1,3 @@
-# dl-test
-
 ## Introduction
   This program tries to perform a dimension reduction from a 3d object to a 2d plane.
   At the point, the 3d object is a point cloud of unit sphere.
