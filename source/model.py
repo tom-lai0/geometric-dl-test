@@ -16,11 +16,10 @@ class VAE(nn.Module):
 
         self.decoder1 = nn.Linear(in_features=2, out_features=16)
         self.decoder2 = nn.Linear(in_features=16, out_features=16)
-        # self.decoder3 = nn.Linear(in_features=16, out_features=16)
-        # self.decoder4 = nn.Linear(in_features=16, out_features=16)
+        self.decoder3 = nn.Linear(in_features=16, out_features=16)
+        self.decoder4 = nn.Linear(in_features=16, out_features=16)
         self.decoder_out = nn.Linear(in_features=16, out_features=3)
 
-        self.normal = torch.distributions.Normal(0, 1)
 
     def forward(self, x):
         mu, logvar = self.encode(x)
@@ -39,14 +38,14 @@ class VAE(nn.Module):
 
     def reparametrize(self, mu, logvar):
         s = torch.normal(0, torch.exp(logvar))
-        z  = mu + s
+        z = mu + s
         return z
 
     def decode(self, z):
         x = F.leaky_relu(self.decoder1(z), 0.2)
         x = F.leaky_relu(self.decoder2(x), 0.2)
-        # x = F.leaky_relu(self.decoder3(x), 0.2)
-        # x = F.leaky_relu(self.decoder4(x), 0.2)
+        x = F.leaky_relu(self.decoder3(x), 0.2)
+        x = F.leaky_relu(self.decoder4(x), 0.2)
         x = self.decoder_out(x)
         return x
 

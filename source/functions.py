@@ -4,23 +4,13 @@ from torch.nn import functional as F
 
 def cal_dist(x, size = 16, dim = 3, device = 'cpu'):
     # return squared pairwise euclidean distance
-    x.reshape((size, dim))
+    x.reshape((size, dim)).to(device=device)
     c = (
         (x ** 2).sum(axis = 1).reshape(size, 1) *
         torch.ones((size, size))
     )
     a = x @ x.T
     return c.T + c - 2 * a
-
-def cal_dist_1(x, size = 16, dim = 3, device = 'cpu'):
-    # return squared pairwise euclidean distance
-    x = torch.reshape(x, (size, dim)).clone().detach().float().requires_grad_()
-    c = torch.mul(
-        torch.reshape(torch.sum(torch.pow(x, 2), 1), (size, 1)),
-        torch.ones((size, size))
-    )
-    a = torch.matmul(x, torch.transpose(x, 0, 1))
-    return torch.transpose(c, 0, 1) + c - 2 * a
 
 
 def exp_inverse_dist_loss(

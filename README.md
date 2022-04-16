@@ -1,3 +1,13 @@
+## Updates
+
+### 16/04
+- Fixed bugs and RAM issue when large number of epochs.
+- Added an updated experiment result.
+
+The encoded latent space now looks good but the reconstruction is still need to be improved.
+![16/04](https://github.com/tom-lai0/geometric-dl-test/blob/main/experiment_3/encoded.png)
+![16/04](https://github.com/tom-lai0/geometric-dl-test/blob/main/experiment_3/reconstruction.png)
+
 ## Introduction
   This program tries to perform a dimension reduction from a 3d object to a 2d plane.
   At the point, the 3d object is a point cloud of unit sphere.
@@ -11,7 +21,7 @@
 
 - ### 1. Mid-way Figures
 
-    ![midway](https://github.com/tom-lai0/dl-test/blob/main/experiment_1/encoded_epoch_500.png)
+    ![midway](https://github.com/tom-lai0/geometric-dl-test/blob/main/experiment_1/encoded_epoch_500.png)
     
     Images with name 'encoded_epoch_xxxx.png'.
     The images plots the encoded latent space during training at epoch no. xxxx.
@@ -25,7 +35,7 @@
 
 - ### 2. Final Latent Space Figures
 
-    ![final](https://github.com/tom-lai0/dl-test/blob/main/experiment_1/encoded.png)
+    ![final](https://github.com/tom-lai0/geometric-dl-test/blob/main/experiment_1/encoded.png)
 
     Images with name 'encoded.png'.
     The images plots the encoded latent space after training.
@@ -35,14 +45,14 @@
 
 - ### 3. Loss History Plots
 
-    ![loss-hist](https://github.com/tom-lai0/dl-test/blob/main/experiment_1/loss_history.png)
+    ![loss-hist](https://github.com/tom-lai0/geometric-dl-test/blob/main/experiment_1/loss_history.png)
 
     Images with name 'loss_history.png', plot the history of the three loss values.
     The x-axis of these images are log(number_of_iterations). 
 
 - ### 4. Projection of the Original Point Cloud
     
-    ![origin-proj](https://github.com/tom-lai0/dl-test/blob/main/experiment_1/original.png)
+    ![origin-proj](https://github.com/tom-lai0/geometric-dl-test/blob/main/experiment_1/original.png)
 
     Images with name 'original.png'.
     The images plot the projections of the original 3d point cloud to 2d plane.
@@ -51,7 +61,7 @@
 
 - ### 5. Projection of the Reconstructed Point Cloud
 
-    ![recon-proj](https://github.com/tom-lai0/dl-test/blob/main/experiment_1/reconstruction.png)
+    ![recon-proj](https://github.com/tom-lai0/geometric-dl-test/blob/main/experiment_1/reconstruction.png)
 
     Images with name 'reconstruction.png'.
     The images plot the projections of the reconstructed 3d point cloud to 2d plane.

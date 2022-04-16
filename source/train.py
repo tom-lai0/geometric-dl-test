@@ -2,6 +2,7 @@ import torch
 from time import time
 from functions import *
 import matplotlib.pyplot as plt
+from plot_save_fig import save_3d_project_fig
 
 
 def train(data, tr_set, model, config):
@@ -20,6 +21,7 @@ def train(data, tr_set, model, config):
         'recon_loss': []
     }
     epoch = 0
+    f, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(27, 9))
 
     while epoch < config['n_epochs']:
         model.train()
@@ -30,9 +32,10 @@ def train(data, tr_set, model, config):
 
             mu_, logvar_, z_, x_ = model(x)
 
-            loss1 = exp_inverse_dist_loss(z_, x, size=config['batch_size'], dim=(2, 3))
+            loss1 = exp_inverse_dist_loss(mu_, x, size=config['batch_size'], dim=(2, 3))
             loss2 = kl_loss(logvar_, mu_)
             loss3 = recon_loss(x_, x)
+            # loss = loss1 + loss2 * 4 + loss3 * 2
             loss = loss1 + loss2 + loss3
 
             loss.backward()
@@ -54,14 +57,19 @@ def train(data, tr_set, model, config):
             d, _ = model.encode(data)
             d = d.cpu().detach().numpy()
 
-            f, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(27, 9))
             ax1.scatter(d[:, 0], d[:, 1], c=data[:, 0], marker='.')
             ax1.set_title('x')
             ax2.scatter(d[:, 0], d[:, 1], c=data[:, 1], marker='.')
             ax2.set_title('y')
             ax3.scatter(d[:, 0], d[:, 1], c=data[:, 2], marker='.')
             ax3.set_title('z')
-            plt.savefig(config['exp_path'] + f'encoded_epoch_{epoch}.png')
+            f.savefig(config['exp_path'] + f'encoded_epoch_{epoch}.png')
+            ax1.cla(); ax2.cla(); ax3.cla()
+            
+            _, _, _, d = model(data)
+            d = d.cpu().detach().numpy()
+            save_3d_project_fig(f, (ax1, ax2, ax3), d, data, config['exp_path'] + f'recon_epoch_{epoch}.png')
+            ax1.cla(); ax2.cla(); ax3.cla()
 
 
     torch.save(model.state_dict(), f=config['save_path'])
