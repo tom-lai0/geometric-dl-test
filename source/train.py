@@ -2,10 +2,10 @@ import torch
 from time import time
 from functions import *
 import matplotlib.pyplot as plt
-from plot_save_fig import save_3d_project_fig
+from plot_save_fig import *
 
 
-def train(data, tr_set, model, config):
+def train(original_data, tr_set, model, config):
     
     start_time = time()
     verboseprint = print if config['verbose'] else lambda *a, **k: None
@@ -18,7 +18,8 @@ def train(data, tr_set, model, config):
     loss_hist = {
         'exp_inv_dist': [],
         'kl_loss': [],
-        'recon_loss': []
+        'recon_loss': [],
+        'logvar_hist': []
     }
     epoch = 0
     f, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(27, 9))
@@ -33,9 +34,9 @@ def train(data, tr_set, model, config):
             mu_, logvar_, z_, x_ = model(x)
 
             loss1 = exp_inverse_dist_loss(mu_, x, size=config['batch_size'], dim=(2, 3))
-            loss2 = kl_loss(logvar_, mu_)
-            loss3 = recon_loss(x_, x)
-            # loss = loss1 + loss2 * 4 + loss3 * 2
+            # loss2 = kl_loss(logvar_, mu_)
+            loss2 = loss_1(mu_)
+            loss3 = recon_loss_l1(x_, x)
             loss = loss1 + loss2 + loss3
 
             loss.backward()
@@ -44,6 +45,9 @@ def train(data, tr_set, model, config):
             loss_hist['exp_inv_dist'].append(loss1.item())
             loss_hist['kl_loss'].append(loss2.item())
             loss_hist['recon_loss'].append(loss3.item())
+
+            if config['reparam']:
+                loss_hist['logvar_hist'].append(torch.mean(logvar_).item())
 
         epoch += 1
 
@@ -54,27 +58,21 @@ def train(data, tr_set, model, config):
             verboseprint(loss_hist['recon_loss'][-1])
             verboseprint('-' * 20)
 
-            d, _ = model.encode(data)
-            d = d.cpu().detach().numpy()
-
-            ax1.scatter(d[:, 0], d[:, 1], c=data[:, 0], marker='.')
-            ax1.set_title('x')
-            ax2.scatter(d[:, 0], d[:, 1], c=data[:, 1], marker='.')
-            ax2.set_title('y')
-            ax3.scatter(d[:, 0], d[:, 1], c=data[:, 2], marker='.')
-            ax3.set_title('z')
-            f.savefig(config['exp_path'] + f'encoded_epoch_{epoch}.png')
-            ax1.cla(); ax2.cla(); ax3.cla()
+            midway_encoded, _ = model.encode(original_data)
+            midway_encoded = midway_encoded.cpu().detach().numpy()
+            plot_encoded(f, (ax1, ax2, ax3), midway_encoded, original_data, 
+                config['exp_path'] + f'encoded_epoch_{epoch}.png')
+           
+            _, _, _, recon = model(original_data)
+            recon = recon.cpu().detach().numpy()
+            save_3d_project_fig(f, (ax1, ax2, ax3), recon, original_data, 
+                config['exp_path'] + f'recon_epoch_{epoch}.png')
             
-            _, _, _, d = model(data)
-            d = d.cpu().detach().numpy()
-            save_3d_project_fig(f, (ax1, ax2, ax3), d, data, config['exp_path'] + f'recon_epoch_{epoch}.png')
             ax1.cla(); ax2.cla(); ax3.cla()
-
 
     torch.save(model.state_dict(), f=config['save_path'])
 
     end_time = time()
-    print(f'Training Finished in {round(end_time - start_time, 2)}')
+    verboseprint(f'Training Finished in {round(end_time - start_time, 2)}')
 
     return loss_hist

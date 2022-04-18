@@ -13,9 +13,7 @@ def cal_dist(x, size = 16, dim = 3, device = 'cpu'):
     return c.T + c - 2 * a
 
 
-def exp_inverse_dist_loss(
-        output, origin, size=16, dim=(3, 3), device='cpu'
-):
+def exp_inverse_dist_loss(output, origin, size=16, dim=(3, 3), device='cpu'):
     output_mat = cal_dist(output, size, dim[0], device)
     origin_mat = cal_dist(origin, size, dim[1], device)
 
@@ -31,7 +29,14 @@ def kl_loss(logvar, mu):
     return -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
 
 
-def recon_loss(recon_x, x):
+def recon_loss_mse(recon_x, x):
     return F.mse_loss(recon_x, x, reduction='sum')
 
+
+def recon_loss_l1(recon_x, x):
+    return F.l1_loss(recon_x, x, reduction='sum')
+
+
+def loss_1(mu):
+    return torch.sum(mu.pow(2) + mu)
 
